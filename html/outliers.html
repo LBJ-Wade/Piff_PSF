@@ -1,0 +1,231 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Outliers &#8212; Piff 0.2.4 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Stats" href="stats.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="stats.html" title="Stats"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Piff 0.2.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="outliers">
+<h1>Outliers<a class="headerlink" href="#outliers" title="Permalink to this headline">¶</a></h1>
+<p>Piff can remove stars that it deems to be outliers from the set of stars used to
+build the PSF model.  This option is specified via an <code class="docutils literal notranslate"><span class="pre">outliers</span></code> section of the
+input configuration file.</p>
+<dl class="class">
+<dt id="piff.Outliers">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Outliers</code><a class="reference internal" href="_modules/piff/outliers.html#Outliers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Outliers" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class for handling outliers.</p>
+<p>This is essentially an abstract base class intended to define the methods that should be
+implemented by any derived class.</p>
+<dl class="classmethod">
+<dt id="piff.Outliers.parseKwargs">
+<em class="property">classmethod </em><code class="descname">parseKwargs</code><span class="sig-paren">(</span><em>config_outliers</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/outliers.html#Outliers.parseKwargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Outliers.parseKwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the outliers field of a configuration dict and return the kwargs to use for
+initializing an instance of the class.</p>
+<p>The base class implementation just returns the kwargs as they are, but derived classes
+might want to override this if they need to do something more sophisticated with them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_outliers</strong> – The outliers field of the configuration dict, config[‘outliers’]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a kwargs dict to pass to the initializer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="piff.Outliers.process">
+<em class="property">classmethod </em><code class="descname">process</code><span class="sig-paren">(</span><em>config_outliers</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/outliers.html#Outliers.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Outliers.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the outliers field of the config dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_outliers</strong> – The configuration dict for the outliers field.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an Outliers instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="piff.Outliers.read">
+<em class="property">classmethod </em><code class="descname">read</code><span class="sig-paren">(</span><em>fits</em>, <em>extname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/outliers.html#Outliers.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Outliers.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a Outliers from a FITS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fits</strong> – An open fitsio.FITS object</li>
+<li><strong>extname</strong> – The name of the extension with the outliers information.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an Outliers handler</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Outliers.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>fits</em>, <em>extname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/outliers.html#Outliers.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Outliers.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an Outliers to a FITS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fits</strong> – An open fitsio.FITS object</li>
+<li><strong>extname</strong> – The name of the extension to write the outliers information.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="piff.ChisqOutliers">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">ChisqOutliers</code><span class="sig-paren">(</span><em>thresh=None</em>, <em>ndof=None</em>, <em>prob=None</em>, <em>nsigma=None</em>, <em>max_remove=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/outliers.html#ChisqOutliers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.ChisqOutliers" title="Permalink to this definition">¶</a></dt>
+<dd><p>An Outliers handler using the chisq of the residual of the interpolated star with the
+original.</p>
+<p>The user can specify the threshold in one of four ways:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The user can specify thresh directly.</li>
+<li>The user can specify ndof to give a multiple of the number of degrees of freedom of
+the model, thresh = ndof * dof.</li>
+<li>The user can specify prob to reject according to the probability that the chisq
+distribution for the model’s number of degrees of freedom would exceed chisq.</li>
+<li>The user can specify nsigma, in which case thresh is calculated according to the
+chisq distribution to give the equivalent rejection probability that corresponds
+to that many sigma.</li>
+</ol>
+</div></blockquote>
+<dl class="method">
+<dt id="piff.ChisqOutliers.removeOutliers">
+<code class="descname">removeOutliers</code><span class="sig-paren">(</span><em>stars</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/outliers.html#ChisqOutliers.removeOutliers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.ChisqOutliers.removeOutliers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove outliers from a list of stars based on their chisq values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>stars</strong> – A list of Star instances</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">stars, nremoved   A new list of stars without outliers, and how many outliers
+were removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="stats.html"
+                        title="previous chapter">Stats</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/outliers.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="stats.html" title="Stats"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Piff 0.2.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

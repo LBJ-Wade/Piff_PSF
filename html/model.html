@@ -1,35 +1,27 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Models &mdash; Piff 0.1 documentation</title>
-    
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <title>Models &#8212; Piff 0.2.4 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Piff 0.1 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Interpolation Schemes" href="interp.html" />
     <link rel="prev" title="Input" href="input.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -41,14 +33,14 @@
         <li class="right" >
           <a href="input.html" title="Input"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Piff 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Piff 0.2.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="models">
 <h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
@@ -57,57 +49,65 @@
 <h2>Model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="piff.Model">
-<em class="property">class </em><tt class="descclassname">piff.</tt><tt class="descname">Model</tt><a class="headerlink" href="#piff.Model" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Model</code><a class="reference internal" href="_modules/piff/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>The base class for modeling a single PSF (i.e. no interpolation yet)</p>
 <p>This is essentially an abstract base class intended to define the methods that should be
 implemented by any derived class.</p>
 <dl class="method">
-<dt id="piff.Model.drawImage">
-<tt class="descname">drawImage</tt><big>(</big><em>image</em>, <em>pos=None</em><big>)</big><a class="headerlink" href="#piff.Model.drawImage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Draw the model on the given image.</p>
+<dt id="piff.Model.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>star</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Star instance that has star.data filled with a rendering
+of the PSF specified by the current StarFit parameters, flux, and center.
+Coordinate mapping of the current StarData is assumed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> – A Star instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">New Star instance with rendered PSF in StarData</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Model.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>star</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the Model to the star’s data to yield iterative improvement on
+its PSF parameters, their uncertainties, and flux (and center, if free).
+The returned star.fit.alpha will be inverse covariance of solution if
+it is estimated, else is None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> – A Star instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">New Star instance with updated fit information</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Model.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>star</em>, <em>mask=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a star to work with the current model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>image</strong> &#8211; A galsim.Image on which to draw the model.</li>
-<li><strong>pos</strong> &#8211; The position on the image at which to place the nominal center.
-[default: None, which means to use the center of the image.]</li>
+<li><strong>star</strong> – A Star instance with the raw data.</li>
+<li><strong>mask</strong> – If True, set data.weight to zero at pixels that are outside
+the range of the model. [default: True]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">image</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Star instance with the appropriate initial fit values</p>
 </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="piff.Model.fitStar">
-<tt class="descname">fitStar</tt><big>(</big><em>star</em><big>)</big><a class="headerlink" href="#piff.Model.fitStar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the model parameters to the data for a single star.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> &#8211; A StarData instance</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self (for convenience of stringing together operations)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="piff.Model.getParameters">
-<tt class="descname">getParameters</tt><big>(</big><big>)</big><a class="headerlink" href="#piff.Model.getParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the parameters of the model, to be used by the interpolator.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a numpy array of the model parameters</td>
 </tr>
 </tbody>
 </table>
@@ -115,7 +115,7 @@ implemented by any derived class.</p>
 
 <dl class="classmethod">
 <dt id="piff.Model.parseKwargs">
-<em class="property">classmethod </em><tt class="descname">parseKwargs</tt><big>(</big><em>config_model</em><big>)</big><a class="headerlink" href="#piff.Model.parseKwargs" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">parseKwargs</code><span class="sig-paren">(</span><em>config_model</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.parseKwargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.parseKwargs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse the model field of a configuration dict and return the kwargs to use for
 initializing an instance of the class.</p>
 <p>The base class implementation just returns the kwargs as they are, but derived classes
@@ -124,9 +124,35 @@ might want to override this if they need to do something more sophisticated with
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_model</strong> &#8211; The model field of the configuration dict, config[&#8216;model&#8217;]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_model</strong> – The model field of the configuration dict, config[‘model’]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a kwargs dict to pass to the initializer</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a kwargs dict to pass to the initializer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="piff.Model.process">
+<em class="property">classmethod </em><code class="descname">process</code><span class="sig-paren">(</span><em>config_model</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the model field of the config dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_model</strong> – The configuration dict for the model field.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a Model instance</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -134,7 +160,7 @@ might want to override this if they need to do something more sophisticated with
 
 <dl class="classmethod">
 <dt id="piff.Model.read">
-<em class="property">classmethod </em><tt class="descname">read</tt><big>(</big><em>fits</em>, <em>extname</em><big>)</big><a class="headerlink" href="#piff.Model.read" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">read</code><span class="sig-paren">(</span><em>fits</em>, <em>extname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a Model from a FITS file.</p>
 <p>Note: the returned Model will not have its parameters set.  This just initializes a fresh
 model that can be used to interpret interpolated vectors.</p>
@@ -143,8 +169,8 @@ model that can be used to interpret interpolated vectors.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fits</strong> &#8211; An open fitsio.FITS object</li>
-<li><strong>extname</strong> &#8211; The name of the extension with the model information.</li>
+<li><strong>fits</strong> – An open fitsio.FITS object</li>
+<li><strong>extname</strong> – The name of the extension with the model information.</li>
 </ul>
 </td>
 </tr>
@@ -155,50 +181,9 @@ model that can be used to interpret interpolated vectors.</p>
 </table>
 </dd></dl>
 
-<dl class="classmethod">
-<dt id="piff.Model.readKwargs">
-<em class="property">classmethod </em><tt class="descname">readKwargs</tt><big>(</big><em>fits</em>, <em>extname</em><big>)</big><a class="headerlink" href="#piff.Model.readKwargs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the kwargs from the data in a FITS binary table.</p>
-<p>The base class implementation just reads each value in the table and uses the column
-name for the name of the kwarg.  However, derived classes may want to do something more
-sophisticated.  Also, they may want to read other extensions from the fits file
-besides just extname.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fits</strong> &#8211; An open fitsio.FITS object.</li>
-<li><strong>extname</strong> &#8211; The name of the extension with the model information.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a kwargs dict to use to initialize the model</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="piff.Model.setParameters">
-<tt class="descname">setParameters</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#piff.Model.setParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the parameters of the model, typically provided by an interpolator.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; A numpy array of the model parameters</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="method">
 <dt id="piff.Model.write">
-<tt class="descname">write</tt><big>(</big><em>fits</em>, <em>extname</em><big>)</big><a class="headerlink" href="#piff.Model.write" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write</code><span class="sig-paren">(</span><em>fits</em>, <em>extname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/model.html#Model.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Model.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a Model to a FITS file.</p>
 <p>Note: this only writes the initialization kwargs to the fits extension, not the parameters.</p>
 <p>The base class implemenation works if the class has a self.kwargs attribute and these
@@ -208,8 +193,8 @@ are all simple values (str, float, or int)</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>fits</strong> &#8211; An open fitsio.FITS object</li>
-<li><strong>extname</strong> &#8211; The name of the extension to write the model information.</li>
+<li><strong>fits</strong> – An open fitsio.FITS object</li>
+<li><strong>extname</strong> – The name of the extension to write the model information.</li>
 </ul>
 </td>
 </tr>
@@ -220,28 +205,70 @@ are all simple values (str, float, or int)</p>
 </dd></dl>
 
 </div>
-<div class="section" id="gaussian">
-<h2>Gaussian<a class="headerlink" href="#gaussian" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gsobjectmodel">
+<h2>GSObjectModel<a class="headerlink" href="#gsobjectmodel" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="piff.Gaussian">
-<em class="property">class </em><tt class="descclassname">piff.</tt><tt class="descname">Gaussian</tt><a class="headerlink" href="#piff.Gaussian" title="Permalink to this definition">¶</a></dt>
-<dd><p>An extremely simple PSF model that just considers the PSF as a sheared Gaussian.</p>
+<dt id="piff.GSObjectModel">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">GSObjectModel</code><span class="sig-paren">(</span><em>gsobj</em>, <em>fastfit=False</em>, <em>force_model_center=True</em>, <em>include_pixel=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model that takes a fiducial GalSim.GSObject and dilates, shifts, and shears it to get a
+good match to stars.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gsobj</strong> – GSObject to use as fiducial profile.</li>
+<li><strong>fastfit</strong> – Use HSM moments for fitting.  Approximate, but fast.  [default: False]</li>
+<li><strong>force_model_center</strong> – If True, PSF model centroid is fixed at origin and
+PSF fitting will marginalize over stellar position.  If False, stellar
+position is fixed at input value and the fitted PSF may be off-center.
+[default: True]</li>
+<li><strong>include_pixel</strong> – Include integration over pixel?  [default: True]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
-<dt id="piff.Gaussian.drawImage">
-<tt class="descname">drawImage</tt><big>(</big><em>image</em>, <em>pos=None</em><big>)</big><a class="headerlink" href="#piff.Gaussian.drawImage" title="Permalink to this definition">¶</a></dt>
+<dt id="piff.GSObjectModel.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>star</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.draw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw the model on the given image.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> – A Star instance with the fitted parameters to use for drawing and a
+data field that acts as a template image for the drawn model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a new Star instance with the data field having an image of the drawn model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.GSObjectModel.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>star</em>, <em>fastfit=None</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the image either using HSM or lmfit.</p>
+<p>If <cite>fastfit</cite> is True, then the galsim.hsm module will be used to estimate the transformation
+parameters that take the fiducial moments into the data moments.  If <cite>fastfit</cite> is False,
+then the Levenberg-Marquardt minimization algorithm will be used instead.  The latter should
+generally be more accurate, but slower due to the need to iteratively propose model
+improvements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>image</strong> &#8211; A galsim.Image on which to draw the model.</li>
-<li><strong>pos</strong> &#8211; The position on the image at which to place the nominal center.
-[default: None, which means to use the center of the image.]</li>
+<li><strong>star</strong> – A Star to fit.</li>
+<li><strong>fastfit</strong> – Use fast HSM moments to fit? [default: None, which means use fitting mode
+specified in the constructor.]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">image</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Star with the fitted parameters in star.fit</p>
 </td>
 </tr>
 </tbody>
@@ -249,61 +276,480 @@ are all simple values (str, float, or int)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="piff.Gaussian.fitStar">
-<tt class="descname">fitStar</tt><big>(</big><em>star</em><big>)</big><a class="headerlink" href="#piff.Gaussian.fitStar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the image by running the HSM adaptive moments code on the image and using
-the resulting moments as an estimate of the Gaussian size/shape.</p>
+<dt id="piff.GSObjectModel.getProfile">
+<code class="descname">getProfile</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.getProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.getProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a version of the model as a GalSim GSObject</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> &#8211; A StarData instance</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> – A numpy array with either  [ size, g1, g2 ]
+or  [ cenu, cenv, size, g1, g2 ]
+depending on if the center of the model is being forced to (0.0, 0.0)
+or not.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a galsim.GSObject instance</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="piff.Gaussian.getParameters">
-<tt class="descname">getParameters</tt><big>(</big><big>)</big><a class="headerlink" href="#piff.Gaussian.getParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the parameters of the model, to be used by the interpolator.</p>
+<dt id="piff.GSObjectModel.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>star</em>, <em>mask=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the given star’s fit parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a numpy array of the model parameters</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – The Star to initialize.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new initialized Star.</p>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="piff.Gaussian.getProfile">
-<tt class="descname">getProfile</tt><big>(</big><big>)</big><a class="headerlink" href="#piff.Gaussian.getProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a version of the PSF model as a GalSim GSObject</p>
+<dt id="piff.GSObjectModel.lmfit">
+<code class="descname">lmfit</code><span class="sig-paren">(</span><em>star</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.lmfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.lmfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit parameters of the given star using lmfit (Levenberg-Marquardt minimization
+algorithm).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a galsim.GSObject instance</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star to fit.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(flux, dx, dy, scale, g1, g2, flag)</p>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="piff.Gaussian.setParameters">
-<tt class="descname">setParameters</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#piff.Gaussian.setParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the parameters of the model, typically provided by an interpolator.</p>
+<dt id="piff.GSObjectModel.moment_fit">
+<code class="descname">moment_fit</code><span class="sig-paren">(</span><em>star</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.moment_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.moment_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate transformations needed to bring self.gsobj towards given star.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.GSObjectModel.reflux">
+<code class="descname">reflux</code><span class="sig-paren">(</span><em>star</em>, <em>fit_center=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#GSObjectModel.reflux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.GSObjectModel.reflux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the Model to the star’s data, varying only the flux (and
+center, if it is free).  Flux and center are updated in the Star’s
+attributes.  This is a single-step solution if only solving for flux,
+otherwise an iterative operation.  DOF in the result assume
+only flux (&amp; center) are free parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; A numpy array of the model parameters</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star instance</li>
+<li><strong>fit_center</strong> – If False, disable any motion of center</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">New Star instance, with updated flux, center, chisq, dof, worst</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="piff.Gaussian">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>fastfit=False</em>, <em>force_model_center=True</em>, <em>include_pixel=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#Gaussian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model PSFs as elliptical Gaussians.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fastfit</strong> – Use HSM moments for fitting.  Approximate, but fast.  [default: False]</li>
+<li><strong>force_model_center</strong> – If True, PSF model centroid is fixed at origin and
+PSF fitting will marginalize over stellar position.  If False, stellar
+position is fixed at input value and the fitted PSF may be off-center.
+[default: True]</li>
+<li><strong>include_pixel</strong> – Include integration over pixel?  [default: True]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="piff.Kolmogorov">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Kolmogorov</code><span class="sig-paren">(</span><em>fastfit=False</em>, <em>force_model_center=True</em>, <em>include_pixel=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#Kolmogorov"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Kolmogorov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model PSFs as elliptical Kolmogorovs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fastfit</strong> – Use HSM moments for fitting.  Approximate, but fast.  [default: False]</li>
+<li><strong>force_model_center</strong> – If True, PSF model centroid is fixed at origin and
+PSF fitting will marginalize over stellar position.  If False, stellar
+position is fixed at input value and the fitted PSF may be off-center.
+[default: True]</li>
+<li><strong>include_pixel</strong> – Include integration over pixel?  [default: True]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="piff.Moffat">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Moffat</code><span class="sig-paren">(</span><em>beta</em>, <em>trunc=0.0</em>, <em>fastfit=False</em>, <em>force_model_center=True</em>, <em>include_pixel=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/gsobject_model.html#Moffat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Moffat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model PSFs as elliptical Moffats.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>beta</strong> – Moffat shape parameter.</li>
+<li><strong>trunc</strong> – Optional truncation radius at which profile drops to zero.  Measured in half
+light radii.  [default: 0, indicating no truncation]</li>
+<li><strong>fastfit</strong> – Use HSM moments for fitting.  Approximate, but fast.  [default: False]</li>
+<li><strong>force_model_center</strong> – If True, PSF model centroid is fixed at origin and
+PSF fitting will marginalize over stellar position.  If False, stellar
+position is fixed at input value and the fitted PSF may be off-center.
+[default: True]</li>
+<li><strong>include_pixel</strong> – Include integration over pixel?  [default: True]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="pixelgrid">
+<h2>PixelGrid<a class="headerlink" href="#pixelgrid" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="piff.PixelGrid">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">PixelGrid</code><span class="sig-paren">(</span><em>scale</em>, <em>size</em>, <em>interp=None</em>, <em>mask=None</em>, <em>start_sigma=1.0</em>, <em>force_model_center=True</em>, <em>degenerate=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>A PSF modeled as interpolation between a grid of points.</p>
+<p>The parameters of the model are the values at the grid points, although the constraint
+for unit flux means that not all grid points are free parameters.  The grid is in uv
+space, with the pitch and size specified on construction. Optionally a boolean
+mask array can be passed specifying which tells which grid elements are non-zero.
+Interpolation will always assume values of zero outside of grid.  Integral of PSF is
+forced to unity and, optionally, centroid is forced to origin.  As a consequence 1 (or 3)
+of the PSF pixel values will be missing from the parameter vector as they are determined
+by the flux (and centroid) constraints. And there is more covariance between pixel values.</p>
+<p>PixelGrid also needs an PixelInterpolant on construction to specify how to determine
+values between grid points.</p>
+<p>Stellar data is assumed either to be in flux units (with default sb=False), such that
+flux is defined as sum of pixel values; or in surface brightness units (sb=True), such
+that flux is (sum of pixels)*(pixel area).  Internally the sb convention is used.</p>
+<p>Convention of this code is that coordinates are (u,v).  All 2d forms of the PSF use
+this indexing order also.  StarData classes can use whatever they want, we only
+access them via 1d arrays.</p>
+<dl class="method">
+<dt id="piff.PixelGrid.chisq">
+<code class="descname">chisq</code><span class="sig-paren">(</span><em>star</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid.chisq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid.chisq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate dependence of chi^2 = -2 log L(D|p) on PSF parameters for single star.
+as a quadratic form chi^2 = dp^T*alpha*dp - 2*beta*dp + chisq,
+where dp is the <em>shift</em> from current parameter values.  Marginalization over
+flux (and center, if free) should be done by this routine. Returned Star
+instance has the resultant alpha, beta, chisq, flux, center) attributes,
+but params vector has not have been updated yet (could be degenerate).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star instance</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Star instance with updated StarFit</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.PixelGrid.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>star</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Star instance that has StarData filled with a rendering
+of the PSF specified by the current StarFit parameters, flux, and center.
+Coordinate mapping of the current StarData is assumed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> – A Star instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">New Star instance with rendered PSF in StarData</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.PixelGrid.fillPSF">
+<code class="descname">fillPSF</code><span class="sig-paren">(</span><em>star</em>, <em>in2d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid.fillPSF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid.fillPSF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the PSF for a star from a given 2d uv-plane array.
+Sets elements outside the mask to zero, renormalizes to enforce flux
+condition, and checks centering condition if force_model_center=True</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star instance to initialize</li>
+<li><strong>in2d</strong> – 2d input array matching the PSF uv-plane grid</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.PixelGrid.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>star</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the Model to the star’s data to yield iterative improvement on
+its PSF parameters, their uncertainties, and flux (and center, if free).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star instance</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Star instance with updated fit information</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.PixelGrid.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>star</em>, <em>mask=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a star to work with the current model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star instance with the raw data.</li>
+<li><strong>mask</strong> – If True, set data.weight to zero at pixels that are outside
+the range of the model.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a star instance with the appropriate initial fit values</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.PixelGrid.reflux">
+<code class="descname">reflux</code><span class="sig-paren">(</span><em>star</em>, <em>fit_center=True</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#PixelGrid.reflux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PixelGrid.reflux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the Model to the star’s data, varying only the flux (and
+center, if it is free).  Flux and center are updated in the Star’s
+attributes.  This is a single-step solution if only solving for flux,
+otherwise an iterative operation.  DOF in the result assume
+only flux (&amp; center) are free parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>star</strong> – A Star instance</li>
+<li><strong>fit_center</strong> – If False, disable any motion of center</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Star instance, with updated flux, center, chisq, dof, worst</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="piff.Lanczos">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Lanczos</code><span class="sig-paren">(</span><em>order=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#Lanczos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Lanczos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lanczos interpolator in 2 dimensions.</p>
+<dl class="method">
+<dt id="piff.Lanczos.derivatives">
+<code class="descname">derivatives</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#Lanczos.derivatives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Lanczos.derivatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate interpolation coefficient for vector of target points, and
+their derivatives with respect to shift in u, v position of the star.</p>
+<p>Outputs will be 5 matrices, each of dimensions (nin, nkernel) where nin is
+number of input coordinates and nkernel is number of points in kernel footprint.
+The coeff matrix gives interpolation coefficients; then there are derivatives of the
+kernel with respect to u and v; then the y and x integer matrices
+give the grid point to which each coefficient is applied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> – 1d array of target u coordinates</li>
+<li><strong>v</strong> – 1d array of target v coordinates</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">coeff, dcdu, dcdv, y, x</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Lanczos.range">
+<code class="descname">range</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#Lanczos.range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Lanczos.range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of interpolation kernel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Maximum distance from target to source pixel.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="piff.Bilinear">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Bilinear</code><a class="reference internal" href="_modules/piff/pixelgrid.html#Bilinear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Bilinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lanczos interpolator in 2 dimensions.</p>
+<dl class="method">
+<dt id="piff.Bilinear.derivatives">
+<code class="descname">derivatives</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#Bilinear.derivatives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Bilinear.derivatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate interpolation coefficient for vector of target points, and
+their derivatives with respect to shift in u, v position of the star.</p>
+<p>Outputs will be 5 matrices, each of dimensions (nin, nkernel) where nin is
+number of input coordinates and nkernel is number of points in kernel footprint.
+The coeff matrix gives interpolation coefficients; then there are derivatives of the
+kernel with respect to u and v; then the y and x integer matrices
+give the grid point to which each coefficient is applied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> – 1d array of target u coordinates</li>
+<li><strong>v</strong> – 1d array of target v coordinates</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">coeff, dcdu, dcdv, y, x</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Bilinear.range">
+<code class="descname">range</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/pixelgrid.html#Bilinear.range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Bilinear.range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of interpolation kernel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Maximum distance from target to source pixel.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="optical">
+<h2>Optical<a class="headerlink" href="#optical" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="piff.Optical">
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">Optical</code><span class="sig-paren">(</span><em>template=None</em>, <em>logger=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/optical_model.html#Optical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Optical" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="piff.Optical.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>star</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/optical_model.html#Optical.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Optical.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the model on the given image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> – A Star instance with the fitted parameters to use for drawing and a
+data field that acts as a template image for the drawn model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a new Star instance with the data field having an image of the drawn model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Optical.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>star</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/optical_model.html#Optical.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Optical.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Warning: This method just updates the fit with the chisq and dof!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>star</strong> – A Star instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a new Star with the fitted parameters in star.fit</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.Optical.getProfile">
+<code class="descname">getProfile</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/optical_model.html#Optical.getProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.Optical.getProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a version of the model as a GalSim GSObject</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> – A np array with [z4, z5, z6…z11]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a galsim.GSObject instance</td>
 </tr>
 </tbody>
 </table>
@@ -318,13 +764,15 @@ the resulting moments as an estimate of the Gaussian size/shape.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Models</a><ul>
 <li><a class="reference internal" href="#model">Model</a></li>
-<li><a class="reference internal" href="#gaussian">Gaussian</a></li>
+<li><a class="reference internal" href="#gsobjectmodel">GSObjectModel</a></li>
+<li><a class="reference internal" href="#pixelgrid">PixelGrid</a></li>
+<li><a class="reference internal" href="#optical">Optical</a></li>
 </ul>
 </li>
 </ul>
@@ -335,29 +783,30 @@ the resulting moments as an estimate of the Gaussian size/shape.</p>
   <h4>Next topic</h4>
   <p class="topless"><a href="interp.html"
                         title="next chapter">Interpolation Schemes</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/model.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/model.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -369,12 +818,12 @@ the resulting moments as an estimate of the Gaussian size/shape.</p>
         <li class="right" >
           <a href="input.html" title="Input"
              >previous</a> |</li>
-        <li><a href="index.html">Piff 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Piff 0.2.4 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
     </div>
   </body>
 </html>

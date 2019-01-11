@@ -1,109 +1,163 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>PSF &mdash; Piff 0.1 documentation</title>
-    
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <title>PSF &#8212; Piff 0.2.4 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Piff 0.1 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stats" href="stats.html" />
     <link rel="prev" title="Output" href="output.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="stats.html" title="Stats"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
           <a href="output.html" title="Output"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Piff 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Piff 0.2.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="psf">
 <h1>PSF<a class="headerlink" href="#psf" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="piff.PSF">
-<em class="property">class </em><tt class="descclassname">piff.</tt><tt class="descname">PSF</tt><big>(</big><em>model</em>, <em>interp</em><big>)</big><a class="headerlink" href="#piff.PSF" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class that encapsulates the full interpolated PSF model.</p>
+<em class="property">class </em><code class="descclassname">piff.</code><code class="descname">PSF</code><a class="reference internal" href="_modules/piff/psf.html#PSF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class for describing a PSF model across a field of view.</p>
 <p>The usual way to create a PSF is through one of the two factory functions:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">psf</span> <span class="o">=</span> <span class="n">piff</span><span class="o">.</span><span class="n">PSF</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">psf</span> <span class="o">=</span> <span class="n">piff</span><span class="o">.</span><span class="n">PSF</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">psf</span> <span class="o">=</span> <span class="n">piff</span><span class="o">.</span><span class="n">PSF</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">psf</span> <span class="o">=</span> <span class="n">piff</span><span class="o">.</span><span class="n">PSF</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The first is used to build a PSF model from the data.
+<p>The first is used to build a PSF model from the data according to a config dict.
 The second is used to read in a PSF model from disk.</p>
-<p>However, it is also possible to construct a PSF from a model instance and an interp instance.
-Any existing parameters in the model instance are ignored.  The model just determines how
-interpolated parameters are to be interpreted.</p>
-<dl class="classmethod">
-<dt id="piff.PSF.build">
-<em class="property">classmethod </em><tt class="descname">build</tt><big>(</big><em>stars</em>, <em>model</em>, <em>interp</em>, <em>logger=None</em><big>)</big><a class="headerlink" href="#piff.PSF.build" title="Permalink to this definition">¶</a></dt>
-<dd><p>The main driver function to build a PSF model from data.</p>
+<dl class="method">
+<dt id="piff.PSF.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>chipnum=0</em>, <em>flux=1.0</em>, <em>offset=(0</em>, <em>0)</em>, <em>stamp_size=48</em>, <em>image=None</em>, <em>logger=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws an image of the PSF at a given location.</p>
+<p>The normal usage would be to specify (chipnum, x, y), in which case Piff will use the
+stored wcs information for that chip to interpolate to the given position and draw
+an image of the PSF:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">psf</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">chipnum</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">103.3</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">592.0</span><span class="p">,</span> <span class="n">stamp_size</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, if the PSF interpolation used extra properties for the interpolation
+(cf. psf.extra_interp_properties), you need to provide them as additional kwargs.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">psf</span><span class="o">.</span><span class="n">extra_interp_properties</span><span class="p">)</span>
+<span class="go">(&#39;ri_color&#39;,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">psf</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">chipnum</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">103.3</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">592.0</span><span class="p">,</span> <span class="n">ri_color</span><span class="o">=</span><span class="mf">0.23</span><span class="p">,</span> <span class="n">stamp_size</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Normally, the image is constructed automatically based on stamp_size, in which case
+the WCS will be taken to be the local Jacobian at this location on the original image.
+However, if you provide your own image using the :image: argument, then whatever WCS
+is present in that image will be respected.  E.g. if you want an image of the PSF in
+sky coordinates rather than image coordinates, you can provide an image with just a
+pixel scale for the WCS.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>stars</strong> &#8211; A list of StarData instances.</li>
-<li><strong>model</strong> &#8211; A Model instance that defines how to model the individual PSFs
-at the location of each star.</li>
-<li><strong>interp</strong> &#8211; An Interp instance that defines how to do the interpolation of the
-data vectors (produced by model for each star).</li>
-<li><strong>logger</strong> &#8211; A logger object for logging debug info. [default: None]</li>
+<li><strong>x</strong> – The image x position.</li>
+<li><strong>y</strong> – The image y position.</li>
+<li><strong>chipnum</strong> – Which chip to use for WCS information. [default: 0, which is
+appropriate if only using a single chip]</li>
+<li><strong>flux</strong> – Flux of PSF to be drawn [default: 1.0]</li>
+<li><strong>offset</strong> – (dx,dy) tuple giving offset of stellar center relative
+to star.data.image_pos [default: (0,0)]</li>
+<li><strong>stamp_size</strong> – The size of the image to construct if no image is provided.
+[default: 48]</li>
+<li><strong>image</strong> – An existing image on which to draw, if desired. [default: None]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+<li><strong>**kwargs</strong> – Any additional properties required for the interpolation.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a PSF instance</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A GalSim Image of the PSF</p>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="piff.PSF.drawImage">
-<tt class="descname">drawImage</tt><big>(</big><em>position</em>, <em>offset=None</em>, <em>logger=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#piff.PSF.drawImage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates star given position and galsim Image</p>
+<dl class="classmethod">
+<dt id="piff.PSF.parseKwargs">
+<em class="property">classmethod </em><code class="descname">parseKwargs</code><span class="sig-paren">(</span><em>config_psf</em>, <em>logger</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.parseKwargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.parseKwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the psf field of a configuration dict and return the kwargs to use for
+initializing an instance of the class.</p>
+<p>The base class implementation just returns the kwargs as they are, but derived classes
+might want to override this if they need to do something more sophisticated with them.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>position</strong> &#8211; Position we are interpolating to.</li>
-<li><strong>offset</strong> &#8211; Tuple; sett the nominal center of the image
-relative to actual center of image [Default: None]</li>
-<li><strong>logger</strong> &#8211; A logger object for logging debug info. [default: None]</li>
+<li><strong>config_psf</strong> – The psf field of the configuration dict, config[‘psf’]</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a galsim image</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a kwargs dict to pass to the initializer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="piff.PSF.process">
+<em class="property">classmethod </em><code class="descname">process</code><span class="sig-paren">(</span><em>config_psf</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the config dict and return a PSF instance.</p>
+<p>As the PSF class is an abstract base class, the returned type will in fact be some
+subclass of PSF according to the contents of the config dict.</p>
+<p>The provided config dict is typically the ‘psf’ field in the base config dict in
+a YAML file, although for compound PSF types, it may be the field for just one of
+several components.</p>
+<p>This function merely creates a “blank” PSF object.  It does not actually do any
+part of the solution yet.  Typically this will be followed by fit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">psf</span> <span class="o">=</span> <span class="n">piff</span><span class="o">.</span><span class="n">PSF</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;psf&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stars</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">pointing</span> <span class="o">=</span> <span class="n">piff</span><span class="o">.</span><span class="n">Input</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">psf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">stars</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">pointing</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>at which point, the <code class="docutils literal notranslate"><span class="pre">psf</span></code> instance would have a solution to the PSF model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_psf</strong> – A dict specifying what type of PSF to build along with the
+appropriate kwargs for building it.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a PSF instance of the appropriate type.</p>
 </td>
 </tr>
 </tbody>
@@ -112,15 +166,15 @@ relative to actual center of image [Default: None]</li>
 
 <dl class="classmethod">
 <dt id="piff.PSF.read">
-<em class="property">classmethod </em><tt class="descname">read</tt><big>(</big><em>file_name</em>, <em>logger=None</em><big>)</big><a class="headerlink" href="#piff.PSF.read" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">read</code><span class="sig-paren">(</span><em>file_name</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a PSF object from a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>file_name</strong> &#8211; The name of the file to write to.</li>
-<li><strong>logger</strong> &#8211; A logger object for logging debug info. [default: None]</li>
+<li><strong>file_name</strong> – The name of the file to read.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
 </ul>
 </td>
 </tr>
@@ -131,17 +185,59 @@ relative to actual center of image [Default: None]</li>
 </table>
 </dd></dl>
 
+<dl class="classmethod">
+<dt id="piff.PSF.readWCS">
+<em class="property">classmethod </em><code class="descname">readWCS</code><span class="sig-paren">(</span><em>fits</em>, <em>extname</em>, <em>logger</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.readWCS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.readWCS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the WCS information from a FITS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fits</strong> – An open fitsio.FITS object</li>
+<li><strong>extname</strong> – The name of the extension to read from</li>
+<li><strong>logger</strong> – A logger object for logging debug info.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">wcs, pointing where wcs is a dict of galsim.BaseWCS instances and
+pointing is a galsim.CelestialCoord instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="piff.PSF.write">
-<tt class="descname">write</tt><big>(</big><em>file_name</em>, <em>logger=None</em><big>)</big><a class="headerlink" href="#piff.PSF.write" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write</code><span class="sig-paren">(</span><em>file_name</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a PSF object to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>file_name</strong> &#8211; The name of the file to write to.</li>
-<li><strong>logger</strong> &#8211; A logger object for logging debug info. [default: None]</li>
+<li><strong>file_name</strong> – The name of the file to write to.</li>
+<li><strong>logger</strong> – A logger object for logging debug info. [default: None]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="piff.PSF.writeWCS">
+<code class="descname">writeWCS</code><span class="sig-paren">(</span><em>fits</em>, <em>extname</em>, <em>logger</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/piff/psf.html#PSF.writeWCS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#piff.PSF.writeWCS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the WCS information to a FITS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fits</strong> – An open fitsio.FITS object</li>
+<li><strong>extname</strong> – The name of the extension to write to</li>
+<li><strong>logger</strong> – A logger object for logging debug info.</li>
 </ul>
 </td>
 </tr>
@@ -157,48 +253,55 @@ relative to actual center of image [Default: None]</li>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="output.html"
                         title="previous chapter">Output</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/psf.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <h4>Next topic</h4>
+  <p class="topless"><a href="stats.html"
+                        title="next chapter">Stats</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/psf.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="stats.html" title="Stats"
+             >next</a> |</li>
+        <li class="right" >
           <a href="output.html" title="Output"
              >previous</a> |</li>
-        <li><a href="index.html">Piff 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Piff 0.2.4 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
     </div>
   </body>
 </html>

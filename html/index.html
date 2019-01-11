@@ -1,34 +1,26 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Piff Documentation &mdash; Piff 0.1 documentation</title>
-    
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <title>Piff Documentation &#8212; Piff 0.2.4 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Piff 0.1 documentation" href="#" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="PIFF: PSFs In the Full FOV" href="overview.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -37,14 +29,14 @@
         <li class="right" >
           <a href="overview.html" title="PIFF: PSFs In the Full FOV"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Piff 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">Piff 0.2.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="piff-documentation">
 <h1>Piff Documentation<a class="headerlink" href="#piff-documentation" title="Permalink to this headline">¶</a></h1>
@@ -59,32 +51,40 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="piffify.html">The piffify executable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input.html">Input</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="input.html#inputhandler">InputHandler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input.html#id1">Input</a></li>
 <li class="toctree-l2"><a class="reference internal" href="input.html#inputfiles">InputFiles</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Models</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="model.html#model">Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model.html#gaussian">Gaussian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#gsobjectmodel">GSObjectModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#pixelgrid">PixelGrid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#optical">Optical</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="interp.html">Interpolation Schemes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="interp.html#interp">Interp</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interp.html#mean">Mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interp.html#polynomial">Polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interp.html#basisinterp">BasisInterp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interp.html#knninterp">kNNInterp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interp.html#gpinterp">GPInterp</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="output.html#outputhandler">OutputHandler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#id1">Output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="output.html#outputfile">OutputFile</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="psf.html">PSF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outliers.html">Outliers</a></li>
 </ul>
 </div>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
 </div>
 
@@ -92,34 +92,35 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Next topic</h4>
   <p class="topless"><a href="overview.html"
                         title="next chapter">PIFF: PSFs In the Full FOV</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -128,12 +129,12 @@
         <li class="right" >
           <a href="overview.html" title="PIFF: PSFs In the Full FOV"
              >next</a> |</li>
-        <li><a href="#">Piff 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">Piff 0.2.4 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mike Jarvis and the other collaborators at https://github.com/rmjarvis/Piff.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
     </div>
   </body>
 </html>
