@@ -460,8 +460,7 @@ def calculate_moments(star, third_order=False, fourth_order=False, radial=False,
     e2 = s.e2
 
     if flag:
-        print("HSM failed")
-        return (-1,-1,-1,-1,-1,-1) + (-1,-1,-1,-1,-1,-1) + (-1,-1,-1,-1,-1,-1)
+        raise RuntimeError("HSM failed with flag %s" % flag)
 
     # build the HSM weight, writing into image
     #profile = galsim.Gaussian(sigma=sigma_m, flux=1.0).shear(e1=e1, e2=e2).shift(u0, v0)
