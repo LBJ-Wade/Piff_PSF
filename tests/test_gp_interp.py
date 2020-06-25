@@ -19,6 +19,7 @@ import numpy as np
 import piff
 import os
 import copy
+import unittest
 from scipy.linalg import cholesky, cho_solve
 from sklearn.model_selection import train_test_split
 
@@ -314,7 +315,8 @@ def test_gp_interp_isotropic():
                  atol=atol, rtol=rtol, test_star_fit=test_star_fit[i],
                  plotting=False)
 
-@timer
+#@timer
+@unittest.skip('test_gp_interp_anisotropic')
 def test_gp_interp_anisotropic():
 
     if __name__ == "__main__":
