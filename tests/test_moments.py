@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import piff
 import galsim
 import copy
@@ -51,7 +50,7 @@ def adrawProfile(star, prof, params, use_fit=True, copy_image=True):
     return Star(data, fit)
 
 
-def makeStarsMoffat(nstar=100,beta=5.):
+def makeStarsMoffat(nstar=100, beta=5., forcefail=False):
 
     # Moffat
     psf = piff.Moffat(beta)
@@ -131,8 +130,11 @@ def makeStarsMoffat(nstar=100,beta=5.):
         noisy_star = piff.Star(noiseless_star.data.setData(im.array.flatten(),True), noiseless_star.fit)
         noisy_star.data.weight = weight   # overwrite weight inside star
 
+        if forcefail:
+            noisy_star.data.weight *= 0.
+        
         noisy_stars.append(noisy_star)
-
+                
         # moments
         moments = calculate_moments(star=noiseless_stars[i],errors=True, third_order=True, fourth_order=True, radial=True)
         moments_noise = calculate_moments(star=noisy_stars[i],errors=True, third_order=True, fourth_order=True, radial=True)
@@ -140,7 +142,11 @@ def makeStarsMoffat(nstar=100,beta=5.):
         all_moments =  moments + moments_noise + tuple(fit_params)
         all_star_moments.append(all_moments)
 
-    df = pd.DataFrame(all_star_moments,columns=moffat_names)
+    # Work it, put it down, flip it and reverse it.
+    full_array = np.vstack(all_star_moments)
+    df = {}
+    for key, val in zip(moffat_names, full_array.T):
+        df[key] = np.array(val)
 
     return df
 
@@ -151,11 +157,28 @@ def makepulldist(dft, beta, vname):
     name_nonoise = "%s_nonoise" % (vname)
     name_sigma = "var%s_noise" % (vname)
 
-    diff = dft[name_noise] - dft[name_nonoise]
+    try:
+        diff = dft[name_noise] - dft[name_nonoise]
+    except KeyError:
+        print (name_noise, name_nonoise, dft.keys())
     pull = diff/np.sqrt(dft[name_sigma])
 
     return pull
 
+
+@timer
+def test_moments_fail():
+
+    np.random.seed(12345)
+    rng = galsim.BaseDeviate(12345)
+    try:
+        dft = makeStarsMoffat(nstar=1,beta=5.,forcefail=True)
+        assert False
+    except galsim.errors.GalSimHSMError:
+        pass
+    return
+        
+    
 
 @timer
 def test_moments(dftlist=None):
@@ -194,7 +217,5 @@ def test_moments(dftlist=None):
         mean_pull = stacked.mean(1)
         rms_pull = stacked.std(1)
         failmask = np.fabs(rms_pull-testvals) > 0.1
-        #print(key, mean_pull.shape, rms_pull.shape, testvals.shape, momentlist, failmask.shape)
-        print(key, failmask, rms_pull[failmask], testvals[failmask])
         np.testing.assert_allclose(mean_pull, 0., atol=0.1)
         np.testing.assert_allclose(rms_pull, testvals, rtol=0.2)
