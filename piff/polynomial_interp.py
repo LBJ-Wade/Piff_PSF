@@ -62,9 +62,9 @@ class Polynomial(Interp):
                             the signature of numpy.polynomial.polynomial.polyval2d
         """
         if order is None and orders is None:
-            raise AttributeError("Either order or orders is required")
+            raise TypeError("Either order or orders is required")
         if order is not None and orders is not None:
-            raise AttributeError("Cannot provide both order and orders")
+            raise TypeError("Cannot provide both order and orders")
         self.degenerate_points = False
         self.order = order
         self.orders = orders
@@ -405,8 +405,5 @@ class Polynomial(Interp):
         """
         pos = self.getProperties(star)
         p = [self._interpolationModel(pos, coeff) for coeff in self.coeffs]
-        if star.fit is None:
-            fit = StarFit(p)
-        else:
-            fit = star.fit.newParams(p)
+        fit = star.fit.newParams(p)
         return Star(star.data, fit)

@@ -71,6 +71,7 @@ class Star(object):
         star.flux       The flux of the object
         star.center     The nominal center of the object (not necessarily the centroid)
         star.is_reserve Whether the star is reserved from being used to fit the PSF
+        star.hsm        HSM measurements for this star as a tuple: (flux, cenu, cenv, size, g1, g2)
     """
     def __init__(self, data, fit):
         """Constructor for Star instance.
@@ -159,6 +160,50 @@ class Star(object):
     def is_reserve(self):
         return self.data.properties.get('is_reserve',False)
 
+    def run_hsm(self):
+        """Use HSM to measure moments of star image.
+
+        This usually isn't called directly.  The results (without flag) are accessible as star.hsm,
+        which caches the results, so repeated access is efficient.
+
+        :returns: (flux, cenu, cenv, size, g1, g2, flag)
+        """
+        image, weight, image_pos = self.data.getImage()
+        # Note that FindAdaptiveMom only respects the weight function in a binary sense.
+        # I.e., pixels with non-zero weight will be included in the moment measurement, those
+        # with weight=0.0 will be excluded.
+        mom = image.FindAdaptiveMom(weight=weight, strict=False)
+
+        sigma = mom.moments_sigma
+        shape = mom.observed_shape
+        # These are in pixel coordinates.  Need to convert to world coords.
+        jac = image.wcs.jacobian(image_pos=image_pos)
+        scale, shear, theta, flip = jac.getDecomposition()
+        # Fix sigma
+        sigma *= scale
+        # Fix shear.  First the flip, if any.
+        if flip:
+            shape = galsim.Shear(g1 = -shape.g1, g2 = shape.g2)
+        # Next the rotation
+        shape = galsim.Shear(g = shape.g, beta = shape.beta + theta)
+        # Finally the shear
+        shape = shear + shape
+
+        flux = mom.moments_amp
+
+        localwcs = image.wcs.local(image_pos)
+        center = localwcs.toWorld(mom.moments_centroid) - localwcs.toWorld(image_pos)
+        flag = mom.moments_status
+
+        return flux, center.x, center.y, sigma, shape.g1, shape.g2, flag
+
+    @property
+    def hsm(self):
+        if not hasattr(self, '_hsm'):
+            flux, cenu, cenv, size, g1, g2, flag = self.run_hsm()
+            self._hsm = flux, cenu, cenv, size, g1, g2, flag
+        return self._hsm
+
     @classmethod
     def makeTarget(cls, x=None, y=None, u=None, v=None, properties={}, wcs=None, scale=None,
                    stamp_size=48, image=None, weight=None, pointing=None, flux=1.0, **kwargs):
@@ -199,7 +244,7 @@ class Star(object):
         # Check that input parameters are valid
         for param in ['x', 'y', 'u', 'v']:
             if eval(param) is not None and param in properties:
-                raise AttributeError("%s may not be given both as a kwarg and in properties"%param)
+                raise TypeError("%s may not be given both as a kwarg and in properties"%param)
         properties = properties.copy()  # So we can modify it and not mess up the caller.
         x = properties.pop('x', x)
         y = properties.pop('y', y)
@@ -207,13 +252,13 @@ class Star(object):
         v = properties.pop('v', v)
         properties.update(kwargs)  # Add any extra kwargs into properties
         if (x is None) != (y is None):
-            raise AttributeError("Either x and y must both be given, or neither.")
+            raise TypeError("Either x and y must both be given, or neither.")
         if (u is None) != (v is None):
-            raise AttributeError("Either u and v must both be given, or neither.")
+            raise TypeError("Either u and v must both be given, or neither.")
         if x is None and u is None:
-            raise AttributeError("Some kind of position must be given.")
+            raise TypeError("Some kind of position must be given.")
         if wcs is not None and scale is not None:
-            raise AttributeError("Scale is invalid when also providing wcs.")
+            raise TypeError("Scale is invalid when also providing wcs.")
 
         # Figure out what the wcs should be if not provided
         if wcs is None:
@@ -244,10 +289,9 @@ class Star(object):
         if image.wcs is None:
             image.wcs = wcs
         if weight is not None:
-            weight = galsim.Image(weight.array.copy(), scale=image.scale)
+            weight = galsim.Image(weight.array.copy(), wcs=image.wcs)
             weight.setCenter(int(x+0.5), int(y+0.5))
 
-            
         # Build the StarData instance
         data = StarData(image, image_pos, field_pos=field_pos, properties=properties, 
                         pointing=pointing, weight=weight)        
@@ -276,12 +320,8 @@ class Star(object):
             prop_keys.remove(key)
         # Add any remaining properties
         for key in prop_keys:
-            if hasattr(stars[0].data.properties[key], '__iter__'):
-                dtypes.append( (key, float, len(stars[0].data.properties[key])))
-                cols.append( [ s.data.properties[key] for s in stars ])
-            else:
-                dtypes.append( (key, float) )
-                cols.append( [ s.data.properties[key] for s in stars ] )
+            dtypes.append( (key, float) )
+            cols.append( [ s.data.properties[key] for s in stars ] )
 
         # Add the local WCS values
         dtypes.extend( [('dudx', float), ('dudy', float), ('dvdx', float), ('dvdy', float) ] )
@@ -331,12 +371,14 @@ class Star(object):
 
         :returns: the arrays coords and params
         """
-        if extname not in fits: raise RuntimeError('{0} not found in FITS object'.format(extname))
+        if extname not in fits:
+            raise IOError('{0} not found in FITS object'.format(extname))
         colnames = fits[extname].get_colnames()
 
         columns = ['u', 'v', 'params']
         for key in columns:
-            if key not in colnames: raise RuntimeError('{0} not found in table'.format(key))
+            if key not in colnames:
+                raise IOError('{0} not found in table'.format(key))
 
         data = fits[extname].read(columns=columns)
         coords = np.array([data['u'], data['v']]).T
@@ -423,7 +465,7 @@ class Star(object):
 
     @staticmethod
     def load_images(stars, file_name, pointing=None,
-                    image_hdu=None, weight_hdu=None, badpix_hdu=None, sky=None,
+                    image_hdu=None, weight_hdu=None, badpix_hdu=None, noise=None, sky=None,
                     logger=None):
         """Load the image data into a list of Stars.
 
@@ -439,54 +481,23 @@ class Star(object):
                                 either 0 or 1 as appropriate according to the compression.]
         :param weight_hdu:      The hdu to use for the weight image. [default: None]
         :param badpix_hdu:      The hdu to use for the bad pixel mask. [default: None]
+        :param noise:           A constant noise value to use in lieu of a weight map
+                                [default: None]
         :param sky:             Optional sky image or float value to subtract from the main
                                 image. [default: None]
         :param logger:          A logger object for logging debug info. [default: None]
 
         :returns: a new list of Stars with the images information loaded.
         """
-        # TODO: This is largely copied from InputHandler.readImages.
-        #       This should probably be refactored a bit to avoid the duplicated code.
+        from .input import InputFiles
+
         logger = galsim.config.LoggerWrapper(logger)
         logger.info("Loading image information from file %s",file_name)
-        image = galsim.fits.read(file_name, hdu=image_hdu)
 
-        if sky is not None:
-            image = image - sky
-
-        # Either read in the weight image, or build a dummy one
-        if weight_hdu is None:
-            logger.debug("Making trivial (wt==1) weight image")
-            weight = galsim.ImageI(image.bounds, init_value=1)
-        else:
-            logger.info("Reading weight image from hdu %d.", weight_hdu)
-            weight = galsim.fits.read(file_name, hdu=weight_hdu)
-            if np.all(weight.array == 0):
-                logger.error("According to the weight mask in %s, all pixels have zero weight!",
-                             file_name)
-
-        # If requested, set wt=0 for any bad pixels
-        if badpix_hdu is not None:
-            logger.info("Reading badpix image from hdu %d.", badpix_hdu)
-            badpix = galsim.fits.read(file_name, hdu=badpix_hdu)
-            # The badpix image may be offset by 32768 from the true value.
-            # If so, subtract it off.
-            if np.any(badpix.array > 32767):
-                logger.debug('min(badpix) = %s',np.min(badpix.array))
-                logger.debug('max(badpix) = %s',np.max(badpix.array))
-                logger.debug("subtracting 32768 from all values in badpix image")
-                badpix -= 32768
-            if np.any(badpix.array < -32767):
-                logger.debug('min(badpix) = %s',np.min(badpix.array))
-                logger.debug('max(badpix) = %s',np.max(badpix.array))
-                logger.debug("adding 32768 to all values in badpix image")
-                badpix += 32768
-            # Also, convert to int16, in case it isn't by default.
-            badpix = galsim.ImageS(badpix)
-            if np.all(badpix.array != 0):
-                logger.error("According to the bad pixel array in %s, all pixels are masked!",
-                                file_name)
-            weight.array[badpix.array != 0] = 0
+        image, weight = InputFiles.readImage(file_name, image_hdu, weight_hdu, badpix_hdu,
+                                             noise=noise, logger=logger)
+        if sky:
+            image -= sky
 
         stars = [ Star(data = StarData(image=image[star.data.image.bounds].copy(),
                                        image_pos=star.data.image_pos,
@@ -631,11 +642,8 @@ class StarData(object):
             self.weight = galsim.Image(image.bounds, init_value=1, wcs=image.wcs, dtype=float)
         elif type(weight) in [int, float]:
             self.weight = galsim.Image(image.bounds, init_value=weight, wcs=image.wcs, dtype=float)
-        elif isinstance(weight, galsim.Image):
-            # Work-around for bug in GalSim 1.3
-            self.weight = galsim.Image(weight, dtype=float, wcs=weight.wcs)
         else:
-            self.weight = galsim.Image(weight, dtype=float)
+            self.weight = galsim.Image(weight, dtype=float, wcs=weight.wcs)
 
         if orig_weight is None:
             self.orig_weight = self.weight
@@ -657,7 +665,7 @@ class StarData(object):
         # Make sure the user didn't provide their own x,y,u,v in properties.
         for key in ['x', 'y', 'u', 'v']:
             if properties is not None and key in properties and not _xyuv_set:
-                raise AttributeError("Cannot provide property %s in properties dict."%key)
+                raise TypeError("Cannot provide property %s in properties dict."%key)
 
         self.properties['x'] = self.image_pos.x
         self.properties['y'] = self.image_pos.y
@@ -686,18 +694,15 @@ class StarData(object):
         # Calculate the field_pos, the position in the fov coordinates
         if wcs.isCelestial():
             if pointing is None:
-                raise AttributeError("If the image uses a CelestialWCS then pointing is required.")
+                raise TypeError("If the image uses a CelestialWCS then pointing is required.")
             sky_pos = wcs.toWorld(image_pos)
             if properties is not None:
                 if 'ra' not in properties:
                     properties['ra'] = sky_pos.ra / galsim.hours
                 if 'dec' not in properties:
                     properties['dec'] = sky_pos.dec / galsim.degrees
-            if galsim.__version__ >= '2.0':
-                u, v = pointing.project(sky_pos)
-                return galsim.PositionD(u/galsim.arcsec, v/galsim.arcsec)
-            else:
-                return pointing.project(sky_pos)
+            u, v = pointing.project(sky_pos)
+            return galsim.PositionD(u/galsim.arcsec, v/galsim.arcsec)
         else:
             return wcs.toWorld(image_pos)
 
@@ -764,43 +769,6 @@ class StarData(object):
             mask = wt != 0.
             return pix[mask], wt[mask], u[mask], v[mask]
 
-    def setData(self, data, include_zero_weight=False, copy_image=True):
-        """Return new StarData with data values replaced by elements of provided 1d array.
-        The array should match the ordering of the one that is produced by getDataVector().
-
-        :param data:                A 1d numpy array with new values for the image data.
-        :param include_zero_weight: If True, the data array includes all pixels.
-                                    If False, it only includes the pixels with weight > 0.
-                                    [default: False]
-        :param copy_image:          If False, will use the same image object.
-                                    If True, will copy the image and then overwrite it.
-                                    [default: True]
-
-        :returns:    New StarData structure
-        """
-        # ??? Do we need a way to fill in pixels that have zero weight and
-        # don't get passed out by getDataVector()???
-
-        if copy_image:
-            newimage = self.image.copy()
-        else:
-            newimage = self.image
-        if include_zero_weight:
-            newimage.array[:,:] = data.reshape(newimage.array.shape)
-        else:
-            ignore = self.weight.array==0.
-            newimage.array[ignore] = 0.
-            newimage.array[~ignore] = data
-
-        return StarData(image=newimage,
-                        image_pos=self.image_pos,
-                        weight=self.weight,
-                        orig_weight=self.orig_weight,
-                        pointing=self.pointing,
-                        field_pos=self.field_pos,
-                        properties=self.properties,
-                        _xyuv_set=True)
-
     def addPoisson(self, signal=None, gain=None):
         """Return new StarData with the weight values altered to reflect
         Poisson shot noise from a signal source, e.g. when the weight
@@ -849,48 +817,6 @@ class StarData(object):
                         pointing=self.pointing,
                         properties=dict(self.properties, gain=gain),
                         _xyuv_set = True)
-
-    def maskPixels(self, mask):
-        """Return new StarData with weight nulled at pixels marked as False in the mask.
-        Note that this cannot un-mask any previously nulled pixels.
-
-        :param mask:      Boolean array with False marked in pixels that should henceforth
-                          be ignored in fitting.
-                          If this is a 2d array it is assumed to match the weight image.
-                          If it is a 1d array, it is assumed to match the vectors returned by
-                          getDataVector().  If None, the self.image is used, clipped from below
-
-        :returns:         A new StarData instance with updated weight array.
-        """
-
-        # Mark the pixels that are not already worthless
-        use = self.weight.array!=0.
-
-        # Get the signal data
-        if len(mask.shape)==2:
-            m = mask[use]
-        else:
-            # Insert 1d vector into currently valid pixels
-            m = mask
-
-        # Zero appropriate weight pixels in new copy
-        weight = self.weight.copy()
-        weight.array[use] = np.where(m, self.weight.array[use], 0.)
-
-        if self.orig_weight != self.weight:
-            orig_weight = self.orig_weight.copy()
-            orig_weight.array[use] = np.where(m, self.orig_weight.array[use], 0.)
-        else:
-            orig_weight = weight
-
-        # Return new object
-        return StarData(image=self.image,
-                        image_pos=self.image_pos,
-                        weight=weight,
-                        orig_weight=orig_weight,
-                        pointing=self.pointing,
-                        properties=self.properties,
-                        _xyuv_set=True)
 
 
 class StarFit(object):
@@ -944,7 +870,6 @@ class StarFit(object):
         self.b = b
         self.chisq = chisq
         self.dof = dof
-        return
 
     @property
     def alpha(self):
@@ -966,7 +891,7 @@ class StarFit(object):
         """
         npp = np.array(params)
         if self.params is not None and npp.shape != self.params.shape:
-            raise TypeError('new StarFit parameters do not match dimensions of old ones')
+            raise ValueError('new StarFit parameters do not match dimensions of old ones')
         flux = kwargs.pop('flux', self.flux)
         center = kwargs.pop('center', self.center)
         return StarFit(npp, flux=flux, center=center, **kwargs)
@@ -974,14 +899,3 @@ class StarFit(object):
     def copy(self):
         return StarFit(self.params, self.flux, self.center, self.A, self.b,
                        self.chisq, self.dof)
-
-    def __getitem__(self, key):
-        """Get a property of the star fit.
-
-        Looks at params to get the property
-
-        :param key:     The name of the property to return
-
-        :returns: the value of the given property.
-        """
-        return self.params[key]

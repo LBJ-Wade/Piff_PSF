@@ -66,6 +66,8 @@ class TwoDHistStats(Stats):
         :param logger:      A logger object for logging debug info. [default: None]
         """
         logger = galsim.config.LoggerWrapper(logger)
+        self.twodhists = {}
+
         # get the shapes
         logger.info("Measuring Star and Model Shapes")
         positions, shapes_truth, shapes_model = self.measureShapes(psf, stars, logger=logger)
@@ -109,7 +111,6 @@ class TwoDHistStats(Stats):
 
         # compute the arrays
         logger.info("Computing TwoDHist arrays")
-        self.twodhists = {}
 
         # throw in coordinates for good measure
         self.twodhists['u'] = self._array_to_2dhist(u, indx_u, indx_v, unique_indx)
@@ -187,6 +188,9 @@ class TwoDHistStats(Stats):
         axs[2, 2].set_title('dg2')
         if self.skip:
             return fig, axs
+
+        if not hasattr(self, 'twodhists'):
+            raise RuntimeError("Must call compute before calling plot or write")
 
         # make the colormaps
         logger.info("Creating TwoDHist colormaps")
@@ -285,10 +289,10 @@ class TwoDHistStats(Stats):
             ui, vi = unique
 
             sample = z[(indx_u == ui) & (indx_v == vi)]
-            if len(sample) > 0:
-                value = self.reducing_function(sample)
-                C[vi, ui] = value
-                C.mask[vi, ui] = 0
+            assert len(sample) > 0  # This is ensured by how we calculate unique_indx
+            value = self.reducing_function(sample)
+            C[vi, ui] = value
+            C.mask[vi, ui] = 0
 
         return C
 
@@ -429,6 +433,7 @@ class WhiskerStats(Stats):
         :param logger:      A logger object for logging debug info. [default: None]
         """
         logger = galsim.config.LoggerWrapper(logger)
+        self.twodhists = {}
 
         # get the shapes
         logger.info("Measuring Star and Model Shapes")
@@ -486,7 +491,6 @@ class WhiskerStats(Stats):
 
         # compute the arrays
         logger.info("Computing TwoDHist arrays")
-        self.twodhists = {}
 
         self.twodhists['u'] = self._array_to_2dhist(u, indx_u, indx_v, unique_indx)
         self.twodhists['v'] = self._array_to_2dhist(v, indx_u, indx_v, unique_indx)
@@ -539,6 +543,9 @@ class WhiskerStats(Stats):
         if self.skip:
             return fig, axs
 
+        if not hasattr(self, 'twodhists'):
+            raise RuntimeError("Must call compute before calling plot or write")
+
         # make the plots
         logger.info("Creating TwoDHist whiskerplots")
 
@@ -590,9 +597,9 @@ class WhiskerStats(Stats):
             ui, vi = unique
 
             sample = z[(indx_u == ui) & (indx_v == vi)]
-            if len(sample) > 0:
-                value = self.reducing_function(sample)
-                C[vi, ui] = value
-                C.mask[vi, ui] = 0
+            assert len(sample) > 0
+            value = self.reducing_function(sample)
+            C[vi, ui] = value
+            C.mask[vi, ui] = 0
 
         return C

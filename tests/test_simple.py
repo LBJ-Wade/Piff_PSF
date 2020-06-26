@@ -17,11 +17,13 @@ import galsim
 import numpy as np
 import piff
 import os
+import sys
 import subprocess
 import yaml
 import fitsio
+import copy
 
-from piff_test_helper import get_script_name, timer
+from piff_test_helper import get_script_name, timer, CaptureLog
 
 
 @timer
@@ -228,7 +230,8 @@ def test_single_image():
     u,v = world_pos.x, world_pos.y
     stamp_size = config['stamp_size']
 
-    target = piff.Star.makeTarget(x=x, y=y, u=u, v=v, wcs=orig_wcs, stamp_size=stamp_size, pointing=orig_pointing)
+    target = piff.Star.makeTarget(x=x, y=y, u=u, v=v, wcs=orig_wcs, stamp_size=stamp_size,
+                                  pointing=orig_pointing)
     true_params = [ sigma, g1, g2 ]
     test_star = interp.interpolate(target)
     np.testing.assert_almost_equal(test_star.fit.params, true_params, decimal=4)
@@ -281,11 +284,13 @@ def test_single_image():
 
     # test copy_image property of drawStar and draw
     for draw in [psf.drawStar, psf.model.draw]:
-        target_star_copy = psf.interp.interpolate(piff.Star(target.data.copy(), target.fit.copy()))  # interp is so that when we do psf.model.draw we have fit.params to work with
+        target_star_copy = psf.interp.interpolate(piff.Star(target.data.copy(), target.fit.copy()))
+        # interp is so that when we do psf.model.draw we have fit.params to work with
 
         test_star_copy = draw(target_star_copy, copy_image=True)
         test_star_nocopy = draw(target_star_copy, copy_image=False)
-        # if we modify target_star_copy, then test_star_nocopy should be modified, but not test_star_copy
+        # if we modify target_star_copy, then test_star_nocopy should be modified,
+        # but not test_star_copy
         target_star_copy.image.array[0,0] = 23456
         assert test_star_nocopy.image.array[0,0] == target_star_copy.image.array[0,0]
         assert test_star_copy.image.array[0,0] != target_star_copy.image.array[0,0]
@@ -294,11 +299,13 @@ def test_single_image():
         assert test_star_copy.image.array[1,1] == target_star_copy.image.array[1,1]
 
     # test that draw works
-    test_image = psf.draw(x=target['x'], y=target['y'], stamp_size=config['input']['stamp_size'], flux=target.fit.flux, offset=target.fit.center)
+    test_image = psf.draw(x=target['x'], y=target['y'], stamp_size=config['input']['stamp_size'],
+                          flux=target.fit.flux, offset=target.fit.center)
     # this image should be the same values as test_star
     assert test_image == test_star.image
     # test that draw does not copy the image
-    image_ref = psf.draw(x=target['x'], y=target['y'], stamp_size=config['input']['stamp_size'], flux=target.fit.flux, offset=target.fit.center, image=test_image)
+    image_ref = psf.draw(x=target['x'], y=target['y'], stamp_size=config['input']['stamp_size'],
+                         flux=target.fit.flux, offset=target.fit.center, image=test_image)
     image_ref.array[0,0] = 123456789
     assert test_image.array[0,0] == image_ref.array[0,0]
     assert test_star.image.array[0,0] != test_image.array[0,0]
@@ -358,6 +365,72 @@ def test_single_image():
     assert psf4.nremoved == psf.nremoved
     test_star = psf4.interp.interpolate(target)
     np.testing.assert_almost_equal(test_star.fit.params, true_params, decimal=4)
+
+    # With very low max_iter, we hit the warning about non-convergence
+    config['psf']['max_iter'] = 1
+    with CaptureLog(level=1) as cl:
+        piff.piffify(config, cl.logger)
+    assert 'PSF fit did not converge' in cl.output
+
+@timer
+def test_invalid_config():
+    # Test a few invalid uses of the config parsing.
+    if __name__ == '__main__':
+        logger = piff.config.setup_logger(verbose=2)
+    else:
+        logger = piff.config.setup_logger(log_file='output/test_invalid_config.log')
+    image_file = os.path.join('output','simple_image.fits')
+    cat_file = os.path.join('output','simple_cat.fits')
+    psf_file = os.path.join('output','simple_psf.fits')
+    config = {
+        'input' : {
+            'image_file_name' : image_file,
+            'cat_file_name' : cat_file,
+            'flag_col' : 'flag',
+            'use_flag' : 1,
+            'skip_flag' : 4,
+        },
+        'psf' : {
+            'model' : { 'type' : 'Gaussian',
+                        'fastfit': True,
+                        'include_pixel': False},
+            'interp' : { 'type' : 'Mean' },
+            'max_iter' : 10,
+            'chisq_thresh' : 0.2,
+        },
+        'output' : { 'file_name' : psf_file },
+    }
+    # Invalid variable specification
+    with np.testing.assert_raises(ValueError):
+        piff.parse_variables(config, ['verbose:0'], logger=logger)
+    # process needs both input and psf
+    with np.testing.assert_raises(ValueError):
+        piff.process(config={'input':config['input']}, logger=logger)
+    with np.testing.assert_raises(ValueError):
+        piff.process(config={'psf':config['psf']}, logger=logger)
+    # piffify also needs output
+    with np.testing.assert_raises(ValueError):
+        piff.piffify(config={'input':config['input']}, logger=logger)
+    with np.testing.assert_raises(ValueError):
+        piff.piffify(config={'psf':config['psf']}, logger=logger)
+    with np.testing.assert_raises(ValueError):
+        piff.piffify(config={'input':config['input'], 'psf':config['psf']}, logger=logger)
+    # plotify doesn't need psf, but needs a 'file_name' in output
+    with np.testing.assert_raises(ValueError):
+        piff.plotify(config={'input':config['input']}, logger=logger)
+    with np.testing.assert_raises(ValueError):
+        piff.plotify(config={'input':config['input'], 'output':{}}, logger=logger)
+
+    # Error if missing either model or interp
+    config2 = copy.deepcopy(config)
+    del config2['psf']['model']
+    with np.testing.assert_raises(ValueError):
+        piff.piffify(config2, logger)
+    config2['psf']['model'] = config['psf']['model']
+    del config2['psf']['interp']
+    with np.testing.assert_raises(ValueError):
+        piff.piffify(config2, logger)
+
 
 @timer
 def test_reserve():
@@ -432,9 +505,200 @@ def test_reserve():
         # Fits should be good for both reserve and non-reserve stars
         np.testing.assert_almost_equal(star.fit.params, true_params, decimal=4)
 
+@timer
+def test_model():
+    """Test Model base class
+    """
+    # type is required
+    config = { 'include_pixel': False }
+    with np.testing.assert_raises(ValueError):
+        model = piff.Model.process(config)
+
+    # Can't do much with a base Model class
+    model = piff.Model()
+    np.testing.assert_raises(NotImplementedError, model.initialize, None)
+    np.testing.assert_raises(NotImplementedError, model.fit, None)
+
+    # Invalid to read a type that isn't a piff.Model type.
+    # Mock this by pretending that Gaussian is the only subclass of Model.
+    if sys.version_info < (3,): return  # mock only available on python 3
+    from unittest import mock
+    filename = os.path.join('input','D00240560_r_c01_r2362p01_piff.fits')
+    with mock.patch('piff.util.get_all_subclasses', return_value=[piff.Gaussian]):
+        with fitsio.FITS(filename,'r') as f:
+            np.testing.assert_raises(ValueError, piff.Model.read, f, extname='psf_model')
+
+
+@timer
+def test_interp():
+    """Test Interp base class
+    """
+    # type is required
+    config = { 'order' : 0, }
+    with np.testing.assert_raises(ValueError):
+        interp = piff.Interp.process(config)
+
+    # Can't do much with a base Interp class
+    interp = piff.Interp()
+    np.testing.assert_raises(NotImplementedError, interp.solve, None)
+    np.testing.assert_raises(NotImplementedError, interp.interpolate, None)
+    np.testing.assert_raises(NotImplementedError, interp.interpolateList, [None])
+
+    filename1 = os.path.join('output','test_interp.fits')
+    with fitsio.FITS(filename1,'rw',clobber=True) as f:
+        np.testing.assert_raises(NotImplementedError, interp._finish_write, f, extname='interp')
+    filename2 = os.path.join('input','D00240560_r_c01_r2362p01_piff.fits')
+    with fitsio.FITS(filename2,'r') as f:
+        np.testing.assert_raises(NotImplementedError, interp._finish_read, f, extname='interp')
+
+    # Invalid to read a type that isn't a piff.Interp type.
+    # Mock this by pretending that Mean is the only subclass of Interp.
+    if sys.version_info < (3,): return  # mock only available on python 3
+    from unittest import mock
+    with mock.patch('piff.util.get_all_subclasses', return_value=[piff.Mean]):
+        with fitsio.FITS(filename2,'r') as f:
+            np.testing.assert_raises(ValueError, piff.Interp.read, f, extname='psf_interp')
+
+
+@timer
+def test_psf():
+    """Test PSF base class
+    """
+    # Need a dummy star for the below calls
+    image = galsim.Image(1,1,scale=1)
+    stardata = piff.StarData(image, image.true_center)
+    star = piff.Star(stardata, None)
+
+    # Can't do much with a base PSF class
+    psf = piff.PSF()
+    np.testing.assert_raises(NotImplementedError, psf.parseKwargs, None)
+    np.testing.assert_raises(NotImplementedError, psf.interpolateStar, star)
+    np.testing.assert_raises(NotImplementedError, psf.interpolateStarList, [star])
+    np.testing.assert_raises(NotImplementedError, psf.drawStar, star)
+    np.testing.assert_raises(NotImplementedError, psf.drawStarList, [star])
+    np.testing.assert_raises(NotImplementedError, psf._drawStar, star)
+
+    # Invalid to read a type that isn't a piff.PSF type.
+    # Mock this by pretending that SingleChip is the only subclass of PSF.
+    if sys.version_info < (3,): return  # mock only available on python 3
+    from unittest import mock
+    filename = os.path.join('input','D00240560_r_c01_r2362p01_piff.fits')
+    with mock.patch('piff.util.get_all_subclasses', return_value=[piff.SingleChipPSF]):
+        np.testing.assert_raises(ValueError, piff.PSF.read, filename)
+
+@timer
+def test_extra_interp():
+    # Test that specifying extra_interp_properties works properly
+    # TODO: This is a very bare bones test of the interface.  There is basically no test of
+    #       this functionality at all yet.  TBD!
+
+    sigma = 1.3
+    g1 = 0.23
+    g2 = -0.17
+    psf = galsim.Gaussian(sigma=sigma).shear(g1=g1, g2=g2)
+    wcs = galsim.JacobianWCS(0.26, 0.05, -0.08, -0.29)
+    image = galsim.Image(64,64, wcs=wcs)
+    psf.drawImage(image, method='no_pixel')
+
+    # use g-i color as an extra property for interpolation.
+    props = dict(gi_color=0.3)
+    print('props = ',props)
+    star = piff.Star(piff.StarData(image, image.true_center, properties=props), None)
+
+    model = piff.Gaussian(fastfit=True, include_pixel=False)
+    interp = piff.Mean()
+    psf = piff.SimplePSF(model, interp, extra_interp_properties=['gi_color'])
+    assert psf.extra_interp_properties == ['gi_color']
+
+    # Note: Mean doesn't actually do anything useful with the extra properties, so this
+    #       isn't really testing anything other than that the code doesn't completely break.
+    pointing = galsim.CelestialCoord(-5 * galsim.arcmin, -25 * galsim.degrees)
+    psf.fit([star], wcs={0 : wcs}, pointing=pointing)
+
+    # Not much of a check here.  Just check that it actually draws something with flux ~= 1
+    im = psf.draw(x=5, y=7, gi_color=0.3)
+    np.testing.assert_allclose(im.array.sum(), 1.0, rtol=1.e-3)
+
+    # Check missing or extra properties
+    with np.testing.assert_raises(TypeError):
+        psf.draw(x=5, y=7)
+    with np.testing.assert_raises(TypeError):
+        psf.draw(x=5, y=7, gi_color=0.3, ri_color=3)
+
+    # Also for SingleChipPSf
+    psf2 = piff.SingleChipPSF(psf, extra_interp_properties=['gi_color'])
+    assert psf2.extra_interp_properties == ['gi_color']
+
+    with np.testing.assert_raises(TypeError):
+        psf2.draw(x=5, y=7, chipnum=0)
+
+@timer
+def test_load_images():
+    """Test the load_images function
+    """
+    if __name__ == '__main__':
+        logger = piff.config.setup_logger(verbose=2)
+    else:
+        logger = piff.config.setup_logger(log_file='output/test_load_image2.log')
+
+    # Same setup as test_single_image, but without flags
+    image = galsim.Image(2048, 2048, scale=0.26)
+    x_list = [ 123.12, 345.98, 567.25, 1094.94, 924.15, 1532.74, 1743.11, 888.39, 1033.29, 1409.31 ]
+    y_list = [ 345.43, 567.45, 1094.32, 924.29, 1532.92, 1743.83, 888.83, 1033.19, 1409.20, 123.11 ]
+    sigma = 1.3
+    g1 = 0.23
+    g2 = -0.17
+    psf = galsim.Gaussian(sigma=sigma).shear(g1=g1, g2=g2)
+    for x,y in zip(x_list, y_list):
+        bounds = galsim.BoundsI(int(x-31), int(x+32), int(y-31), int(y+32))
+        psf.drawImage(image[bounds], center=galsim.PositionD(x,y), method='no_pixel')
+    image.addNoise(galsim.GaussianNoise(rng=galsim.BaseDeviate(1234), sigma=1e-6))
+    image_file = os.path.join('output','test_load_images_im.fits')
+    image.write(image_file)
+
+    dtype = [ ('x','f8'), ('y','f8') ]
+    data = np.empty(len(x_list), dtype=dtype)
+    data['x'] = x_list
+    data['y'] = y_list
+    cat_file = os.path.join('output','test_load_images_cat.fits')
+    fitsio.write(cat_file, data, clobber=True)
+
+    # Make star data
+    config = { 'image_file_name' : image_file,
+               'cat_file_name': cat_file }
+    orig_stars, wcs, pointing = piff.Input.process(config, logger)
+
+    # Fit these with a simple Mean, Gaussian
+    model = piff.Gaussian()
+    interp = piff.Mean()
+    psf = piff.SimplePSF(model, interp)
+    psf.fit(orig_stars, wcs, pointing, logger=logger)
+    psf_file = os.path.join('output','test_load_images_psf.fits')
+    psf.write(psf_file, logger)
+
+    # Read this file back in.  It has the star data, but the images are blank.
+    psf2 = piff.read(psf_file, logger)
+    assert len(psf2.stars) == 10
+    for star in psf2.stars:
+        np.testing.assert_array_equal(star.image.array, 0.)
+
+    loaded_stars = piff.Star.load_images(psf2.stars, image_file)
+    for star, orig in zip(loaded_stars, psf.stars):
+        np.testing.assert_array_equal(star.image.array, orig.image.array)
+
+    # Can optionally supply sky to subtract
+    loaded_stars = piff.Star.load_images(psf2.stars, image_file, sky=10)
+    for star, orig in zip(loaded_stars, psf.stars):
+        np.testing.assert_array_equal(star.image.array, orig.image.array-10)
+
 
 if __name__ == '__main__':
     test_Gaussian()
     test_Mean()
     test_single_image()
+    test_invalid_config()
     test_reserve()
+    test_model()
+    test_interp()
+    test_psf()
+    test_load_images()

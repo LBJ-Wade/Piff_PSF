@@ -55,7 +55,7 @@ class Output(object):
         return output_handler
 
     @classmethod
-    def parseKwargs(cls, config_output, logger=None):  # pragma: no cover
+    def parseKwargs(cls, config_output, logger=None):
         """Parse the output field of a configuration dict and return the kwargs to use for
         initializing an instance of the class.
 
@@ -108,8 +108,6 @@ class OutputFile(Output):
         :param stats_list:  Optionally a list of Stats instances to also output. [default: None]
         :param logger:      A logger object for logging debug info. [default: None]
         """
-        # TODO: could probably also add an option to output one or more catalogs with information
-        #       about the star lists, measured size/shape, etc.
         self.file_name = file_name
         if stats_list is not None:
             self.stats_list = stats_list
