@@ -315,7 +315,6 @@ def test_gp_interp_isotropic():
                  atol=atol, rtol=rtol, test_star_fit=test_star_fit[i],
                  plotting=False)
 
-#@unittest.skip('test_gp_interp_anisotropic')
 @timer
 def test_gp_interp_anisotropic():
 
