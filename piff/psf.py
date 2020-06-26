@@ -86,7 +86,7 @@ class PSF(object):
         return psf
 
     @classmethod
-    def parseKwargs(cls, config_psf, logger):
+    def parseKwargs(cls, config_psf, logger=None):
         """Parse the psf field of a configuration dict and return the kwargs to use for
         initializing an instance of the class.
 
@@ -98,10 +98,7 @@ class PSF(object):
 
         :returns: a kwargs dict to pass to the initializer
         """
-        kwargs = {}
-        kwargs.update(config_psf)
-        kwargs.pop('type',None)
-        return kwargs
+        raise NotImplementedError("Derived classes must define the parseKwargs function")
 
     def draw(self, x, y, chipnum=0, flux=1.0, offset=(0,0), stamp_size=48, image=None,
              logger=None, **kwargs):
@@ -147,7 +144,7 @@ class PSF(object):
         for key in self.extra_interp_properties:
             if key not in kwargs:
                 raise TypeError("Extra interpolation property %r is required"%key)
-            properties = kwags.pop(key)
+            properties[key] = kwargs.pop(key)
         if len(kwargs) != 0:
             raise TypeError("draw got an unexpecte keyword argument %r"%kwargs.keys()[0])
 
@@ -179,20 +176,86 @@ class PSF(object):
         star = self.drawStar(star, copy_image=copy_image)
         return star.data.image
 
+    def interpolateStarList(self, stars):
+        """Update the stars to have the current interpolated fit parameters according to the
+        current PSF model.
+
+        :param stars:       List of Star instances to update.
+
+        :returns:           List of Star instances with their fit parameters updated.
+        """
+        return [self.interpolateStar(star) for star in stars]
+
+    def interpolateStar(self, star):
+        """Update the star to have the current interpolated fit parameters according to the
+        current PSF model.
+
+        :param star:        Star instance to update.
+
+        :returns:           Star instance with its fit parameters updated.
+        """
+        raise NotImplementedError("Derived classes must define the interpolateStar function")
+
     def drawStarList(self, stars, copy_image=True):
-        """Generate PSF images for given stars.
+        """Generate PSF images for given stars. Takes advantage of
+        interpolateList for significant speedup with some interpolators.
+
+        .. note::
+
+            If the stars already have the fit parameters calculated, then this will trust
+            those values and not redo the interpolation.  If this might be a concern, you can
+            force the interpolation to be redone by running
+
+                >>> stars = psf.interpolateList(stars)
+
+            before running `drawStarList`.
 
         :param stars:       List of Star instances holding information needed
                             for interpolation as well as an image/WCS into
                             which PSF will be rendered.
-        :param copy_image:          If False, will use the same image object.
-                                    If True, will copy the image and then overwrite it.
-                                    [default: True]
+        :param copy_image:  If False, will use the same image object.
+                            If True, will copy the image and then overwrite it.
+                            [default: True]
 
         :returns:           List of Star instances with its image filled with
                             rendered PSF
         """
-        return [self.drawStar(star, copy_image=copy_image) for star in stars]
+        if any(star.fit is None or star.fit.params is None for star in stars):
+            stars = self.interpolateStarList(stars)
+        return [self._drawStar(star, copy_image=copy_image) for star in stars]
+
+    def drawStar(self, star, copy_image=True):
+        """Generate PSF image for a given star.
+
+        .. note::
+
+            If the star already has the fit parameters calculated, then this will trust
+            those values and not redo the interpolation.  If this might be a concern, you can
+            force the interpolation to be redone by running
+
+                >>> star = psf.interpolateList(star)
+
+            before running `drawStar`.
+
+        :param star:        Star instance holding information needed for interpolation as
+                            well as an image/WCS into which PSF will be rendered.
+        :param copy_image:  If False, will use the same image object.
+                            If True, will copy the image and then overwrite it.
+                            [default: True]
+
+        :returns:           Star instance with its image filled with rendered PSF
+        """
+        # Interpolate parameters to this position/properties (if not already done):
+        if star.fit is None or star.fit.params is None:
+            star = self.interpolateStar(star)
+        # Render the image
+        return self._drawStar(star, copy_image=copy_image)
+
+    def _drawStar(self, star, copy_image=True):
+        # Derived classes may choose to override any of the above functions
+        # But they have to at least override this one and interpolateStar to implement
+        # their actual PSF model.
+        raise NotImplementedError("Derived classes must define the _drawStar function")
 
     def write(self, file_name, logger=None):
         """Write a PSF object to a file.
@@ -289,22 +352,6 @@ class PSF(object):
 
         return psf
 
-    def _finish_read(self, fits, extname, logger):
-        """Finish up the read process
-
-        In the base class, this is a no op, but for classes that need to do something else at
-        the end of the read process, this hook is available to be overridden.
-
-        (E.g. composite psf classes might copy the stars, wcs, pointing information into the
-        various components.)
-
-        :param fits:        An open fitsio.FITS object
-        :param extname:     The name of the extension with the psf information.
-        :param logger:      A logger object for logging debug info.
-        """
-        pass
-
-
     def writeWCS(self, fits, extname, logger):
         """Write the WCS information to a FITS file.
 
@@ -319,17 +366,10 @@ class PSF(object):
             import pickle
         logger = galsim.config.LoggerWrapper(logger)
 
-        # Start with the chipnums, which may be int or str type.
-        # Assume they are all the same type at least.
+        # Start with the chipnums
         chipnums = list(self.wcs.keys())
         cols = [ chipnums ]
-        if np.dtype(type(chipnums[0])).kind in np.typecodes['AllInteger']:
-            dtypes = [ ('chipnums', int) ]
-        else:
-            # coerce to string, just in case it's something else.
-            chipnums = [ str(c) for c in chipnums ]
-            max_len = np.max([ len(c) for c in chipnums ])
-            dtypes = [ ('chipnums', bytes, max_len) ]
+        dtypes = [ ('chipnums', int) ]
 
         # GalSim WCS objects can be serialized via pickle
         wcs_str = [ base64.b64encode(pickle.dumps(w)) for w in self.wcs.values() ]
@@ -341,8 +381,6 @@ class PSF(object):
         nchunks = max_len // chunk_size + 1
         cols.append( [nchunks]*len(chipnums) )
         dtypes.append( ('nchunks', int) )
-        if nchunks > 1:
-            logger.debug('Using %d chunks for the wcs pickle string',nchunks)
 
         # Update to size of chunk we actually need.
         chunk_size = (max_len + nchunks - 1) // nchunks

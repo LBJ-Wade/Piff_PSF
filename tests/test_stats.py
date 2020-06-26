@@ -50,7 +50,7 @@ def test_twodstats():
                                    np.array([-0.1 * 1000 / 2048, 0, 0.1 / (0.263 * 2048), 0]),
                                    decimal=4)
 
-    stats = piff.TwoDHistStats(number_bins_u=5, number_bins_v=5, reducing_function='np.mean')
+    stats = piff.TwoDHistStats(number_bins_u=5, number_bins_v=5)  # implicitly np.median
     stats.compute(psf, stars, logger=logger)
     # check the twodhists
     # get the average value in the bin
@@ -77,12 +77,37 @@ def test_twodstats():
     twodstats_file = os.path.join('output','twodstats.pdf')
     stats.write(twodstats_file)
 
+    with np.testing.assert_raises(ValueError):
+        stats.write()  # If not given in constructor, must give file name here.
+
     # repeat for whisker
     stats = piff.WhiskerStats(number_bins_u=21, number_bins_v=21, reducing_function='np.mean')
     stats.compute(psf, stars)
     # Test the plotting and writing
-    twodstats_file = os.path.join('output','whiskerstats.pdf')
-    stats.write(twodstats_file)
+    whisker_file = os.path.join('output','whiskerstats.pdf')
+    stats.write(whisker_file)
+    with np.testing.assert_raises(ValueError):
+        stats.write()
+
+    # With large number of bins, many will have no objects.  This is ok.
+    # Also, can use other np functions like max, std, instead to get different stats
+    # Not sure when these would be useful, but they are allowed.
+    # And, check usage where file_name is given in init.
+    twodstats_file2 = os.path.join('output','twodstats.pdf')
+    stats2 = piff.TwoDHistStats(number_bins_u=50, number_bins_v=50, reducing_function='np.std',
+                                file_name=twodstats_file2)
+    with np.testing.assert_raises(RuntimeError):
+        stats2.write()  # Cannot write before compute
+    stats2.compute(psf, stars, logger=logger)
+    stats2.write()
+
+    whisker_file2 = os.path.join('output','whiskerstats.pdf')
+    stats2 = piff.WhiskerStats(number_bins_u=100, number_bins_v=100, reducing_function='np.max',
+                               file_name=whisker_file2)
+    with np.testing.assert_raises(RuntimeError):
+        stats2.write()  # Cannot write before compute
+    stats2.compute(psf, stars)
+    stats2.write()
 
 @timer
 def test_shift_cmap():
@@ -325,7 +350,12 @@ def test_rhostats_config():
             'file_name' : psf_file,
             'stats' : {  # Note: stats doesn't have to be a list.
                 'type': 'Rho',
-                'file_name': rho_file
+                'file_name': rho_file,
+                'min_sep': 30,
+                'max_sep': 600,
+                'sep_units': 'arcsec',
+                'bin_type': 'Linear',
+                'bin_size': 30,
             }
         },
     }
@@ -344,6 +374,8 @@ def test_rhostats_config():
     psf = piff.read(psf_file)
     orig_stars, wcs, pointing = piff.Input.process(config['input'], logger)
     stats = piff.RhoStats(min_sep=min_sep, max_sep=max_sep, bin_size=bin_size)
+    with np.testing.assert_raises(RuntimeError):
+        stats.write('dummy')  # Cannot write before compute
     stats.compute(psf, orig_stars)
 
     rhos = [stats.rho1, stats.rho2, stats.rho3, stats.rho4, stats.rho5]
@@ -436,7 +468,10 @@ def test_shapestats_config():
     psf = piff.read(psf_file)
     shapeStats = piff.ShapeHistogramsStats()
     orig_stars, wcs, pointing = piff.Input.process(config['input'], logger)
+    with np.testing.assert_raises(RuntimeError):
+        shapeStats.write()  # Cannot write before compute
     shapeStats.compute(psf, orig_stars)
+    shapeStats.plot(psf, histtype='bar', log=True)  # can supply additional args for matplotlib
 
     # test their characteristics
     sigma = 1.3  # (copied from setup())
@@ -500,6 +535,8 @@ def test_starstats_config():
     psf = piff.read(psf_file)
     starStats = piff.StarStats()
     orig_stars, wcs, pointing = piff.Input.process(config['input'], logger)
+    with np.testing.assert_raises(RuntimeError):
+        starStats.write()  # Cannot write before compute
     starStats.compute(psf, orig_stars)
     assert starStats.number_plot == len(starStats.stars)
     assert starStats.number_plot == len(starStats.models)
@@ -638,8 +675,12 @@ def test_hsmcatalog():
     psf = piff.PSF.read(psf_file)
     stars, _, _ = piff.Input.process(config['input'])
     hsmcat = piff.stats.HSMCatalogStats()
+    with np.testing.assert_raises(RuntimeError):
+        hsmcat.write('dummy')  # Cannot write before compute
     hsmcat.compute(psf, stars)
     hsm_file2 = os.path.join('output', 'test_hsmcatalog2.fits')
+    with np.testing.assert_raises(ValueError):
+        hsmcat.write()  # Must supply file_name if not given in constructor
     hsmcat.write(hsm_file2)
     data2 = fitsio.read(hsm_file2)
     for key in data.dtype.names:
@@ -740,6 +781,30 @@ def test_bad_hsm():
 
     for f in [twodhist_file, rho_file, shape_file, star_file, hsm_file]:
         assert os.path.exists(f)
+
+@timer
+def test_base_stats():
+    """Test the base Stats class.
+    """
+    # type is required
+    config = { 'file_name' : 'dummy_file' }
+    with np.testing.assert_raises(ValueError):
+        stats = piff.Stats.process(config)
+
+    # ... for all stats in list.
+    config = [ { 'type': 'TwoDHist', 'file_name': 'f1' },
+               { 'type': 'Whisker', 'file_name': 'f2', },
+               { 'type': 'Rho', 'file_name': 'f3' },
+               { 'file_name' : 'dummy_file' },
+             ]
+    with np.testing.assert_raises(ValueError):
+        stats = piff.Stats.process(config)
+
+    # Can't do much with a base Stats class
+    stats = piff.Stats()
+    np.testing.assert_raises(NotImplementedError, stats.compute, None, None)
+    np.testing.assert_raises(NotImplementedError, stats.plot)
+
 
 if __name__ == '__main__':
     setup()

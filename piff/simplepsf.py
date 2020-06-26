@@ -21,7 +21,7 @@ from __future__ import print_function
 import numpy as np
 import galsim
 
-from .model import Model, ModelFitError
+from .model import Model
 from .interp import Interp
 from .outliers import Outliers
 from .psf import PSF
@@ -42,8 +42,7 @@ class SimplePSF(PSF):
         :param outliers:    Optionally, an Outliers instance used to remove outliers.
                             [default: None]
         :param extra_interp_properties: A list of any extra properties that will be used for
-                            the interpolation in addition to (u,v).
-                            [default: None]
+                                        the interpolation in addition to (u,v). [default: None]
         :param chisq_thresh: Change in reduced chisq at which iteration will terminate.
                             [default: 0.1]
         :param max_iter:    Maximum number of iterations to try. [default: 30]
@@ -58,7 +57,7 @@ class SimplePSF(PSF):
         self.chisq_thresh = chisq_thresh
         self.max_iter = max_iter
         self.kwargs = {
-            # These are junk entries that will be overwritten.
+            # model and interp are junk entries that will be overwritten.
             # TODO: Come up with a nicer mechanism for specifying items that can be overwritten
             #       in the _finish_read function.
             'model': 0,
@@ -67,6 +66,10 @@ class SimplePSF(PSF):
             'chisq_thresh': self.chisq_thresh,
             'max_iter': self.max_iter,
         }
+        self.chisq = 0.
+        self.last_delta_chisq = 0.
+        self.dof = 0
+        self.nremoved = 0
 
     @classmethod
     def parseKwargs(cls, config_psf, logger):
@@ -85,7 +88,8 @@ class SimplePSF(PSF):
         kwargs.pop('type',None)
 
         for key in ['model', 'interp']:
-            if key not in kwargs:
+            if key not in kwargs:  # pragma: no cover
+                # This actually is covered, but for some reason, codecov thinks it isn't.
                 raise ValueError("%s field is required in psf field for type=Simple"%key)
 
         # make a Model object to use for the individual stellar fitting
@@ -171,7 +175,7 @@ class SimplePSF(PSF):
             for star in use_stars:
                 try:
                     star = fit_fn(star, logger=logger)
-                except ModelFitError as e:  # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     logger.warning("Failed fitting star at %s.", star.image_pos)
                     logger.warning("Excluding it from this iteration.")
                     logger.warning("  -- Caught exception: %s", e)
@@ -195,19 +199,18 @@ class SimplePSF(PSF):
 
             # Refit and recenter all stars, collect stats
             logger.debug("             Re-fluxing stars")
-            if hasattr(self.model, 'reflux'):
-                new_stars = []
-                for s in self.stars:
-                    try:
-                        new_star = self.model.reflux(s, logger=logger)
-                    except Exception as e:  # pragma: no cover
-                        logger.warning("Failed trying to reflux star at %s.  Excluding it.",
-                                       s.image_pos)
-                        logger.warning("  -- Caught exception: %s", e)
-                        nremoved += 1
-                    else:
-                        new_stars.append(new_star)
-                self.stars = new_stars
+            new_stars = []
+            for s in self.stars:
+                try:
+                    new_star = self.model.reflux(s, logger=logger)
+                except Exception as e:  # pragma: no cover
+                    logger.warning("Failed trying to reflux star at %s.  Excluding it.",
+                                    s.image_pos)
+                    logger.warning("  -- Caught exception: %s", e)
+                    nremoved += 1
+                else:
+                    new_stars.append(new_star)
+            self.stars = new_stars
 
             # Perform outlier rejection, but not on first iteration for degenerate solvers.
             if self.outliers and (iteration > 0 or not degenerate_points):
@@ -263,60 +266,7 @@ class SimplePSF(PSF):
         self.model.normalize(star)
         return star
 
-    def drawStarList(self, stars, copy_image=True):
-        """Generate PSF images for given stars. Takes advantage of
-        interpolateList for significant speedup with some interpolators.
-
-        .. note::
-
-            If the stars already have the fit parameters calculated, then this will trust
-            those values and not redo the interpolation.  If this might be a concern, you can
-            force the interpolation to be redone by running
-
-                >>> stars = psf.interpolateList(stars)
-
-            before running `drawStarList`.
-
-        :param stars:       List of Star instances holding information needed
-                            for interpolation as well as an image/WCS into
-                            which PSF will be rendered.
-        :param copy_image:  If False, will use the same image object.
-                            If True, will copy the image and then overwrite it.
-                            [default: True]
-
-        :returns:           List of Star instances with its image filled with
-                            rendered PSF
-        """
-        if any(star.fit is None or star.fit.params is None for star in stars):
-            stars = self.interpolateStarList(stars)
-        stars = [self.model.draw(star, copy_image=copy_image) for star in stars]
-        return stars
-
-    def drawStar(self, star, copy_image=True):
-        """Generate PSF image for a given star.
-
-        .. note::
-
-            If the star already has the fit parameters calculated, then this will trust
-            those values and not redo the interpolation.  If this might be a concern, you can
-            force the interpolation to be redone by running
-
-                >>> star = psf.interpolateList(star)
-
-            before running `drawStar`.
-
-        :param star:        Star instance holding information needed for interpolation as
-                            well as an image/WCS into which PSF will be rendered.
-        :param copy_image:  If False, will use the same image object.
-                            If True, will copy the image and then overwrite it.
-                            [default: True]
-
-        :returns:           Star instance with its image filled with rendered PSF
-        """
-        # Interpolate parameters to this position/properties (if not already done):
-        if star.fit is None or star.fit.params is None:
-            star = self.interpolateStar(star)
-        # Render the image
+    def _drawStar(self, star, copy_image=True):
         return self.model.draw(star, copy_image=copy_image)
 
     def _finish_write(self, fits, extname, logger):
@@ -327,15 +277,12 @@ class SimplePSF(PSF):
         :param logger:      A logger object for logging debug info.
         """
         logger = galsim.config.LoggerWrapper(logger)
-        if hasattr(self, 'chisq'):
-            chisq_dict = {
-                'chisq' : self.chisq,
-                'last_delta_chisq' : self.last_delta_chisq,
-                'dof' : self.dof,
-                'nremoved' : self.nremoved,
-            }
-        else:
-            chisq_dict = {}
+        chisq_dict = {
+            'chisq' : self.chisq,
+            'last_delta_chisq' : self.last_delta_chisq,
+            'dof' : self.dof,
+            'nremoved' : self.nremoved,
+        }
         write_kwargs(fits, extname + '_chisq', chisq_dict)
         logger.debug("Wrote the chisq info to extension %s",extname + '_chisq')
         self.model.write(fits, extname + '_model')
