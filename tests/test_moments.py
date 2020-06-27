@@ -22,8 +22,6 @@ from piff.star import Star, StarFit, StarData
 from piff.util import calculate_moments
 
 from piff_test_helper import timer
-from piff.util import hsm
-
 
 
 
@@ -174,7 +172,7 @@ def makeStarsMoffat(nstar=100, beta=5., forcefail=False, test_return_error=False
             np.testing.assert_equal(np.array(moments)[mask_4r], np.array(moments_4r))
         
         if test_mask:
-            copy_star = noise_star.copy()
+            copy_star = noisy_star.copy()
             # mask out a pixel that is not too close to the center of the stamp.  
             copy_star.data.weight[x[i]+5, y[i]+5] = 0
             test_moments =  calculate_moments(star=copy_star,errors=True, third_order=True, fourth_order=True, radial=True)
