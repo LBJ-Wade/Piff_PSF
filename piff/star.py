@@ -161,7 +161,7 @@ class Star(object):
         return self.data.properties.get('is_reserve',False)
 
     def copy(self):
-        return copy.deepcopy(self)
+        return copy.copy(self)
     
     def run_hsm(self):
         """Use HSM to measure moments of star image.
