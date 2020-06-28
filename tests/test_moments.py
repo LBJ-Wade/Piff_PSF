@@ -141,13 +141,12 @@ def makeStarsMoffat(nstar=100, beta=5., forcefail=False, test_return_error=False
         weight = 1.0/inverse_weight
 
         # make new noisy star by resetting data in the noiseless star
-        noisy_star = noiseless_star.copy()
+        noisy_star = copy.deepcopy(noiseless_star)
         noisy_star.data.image = im
         noisy_star.data.weight = weight
 
         if forcefail:
             noisy_star.data.weight *= 0.
-            
              
         noisy_stars.append(noisy_star)
 
@@ -157,16 +156,19 @@ def makeStarsMoffat(nstar=100, beta=5., forcefail=False, test_return_error=False
 
         if test_options:
             moments_34 = calculate_moments(star=noiseless_stars[i], errors=True, third_order=True, fourth_order=True, radial=False)
+            # No radial moments, skip items 16-18 of moments and errors
             mask_34 = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, False, False,
                        True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, False, False]
             np.testing.assert_equal(np.array(moments)[mask_34], np.array(moments_34))
 
             moments_3r = calculate_moments(star=noiseless_stars[i], errors=True, third_order=True, fourth_order=False, radial=True)
+            # No third order moments, skip items 11-15 of moments and errors            
             mask_3r = [True, True, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True,
                        True, True, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True]
             np.testing.assert_equal(np.array(moments)[mask_3r], np.array(moments_3r))
 
             moments_4r = calculate_moments(star=noiseless_stars[i], errors=True, third_order=False, fourth_order=True, radial=True)
+            # No third order moments, skip items 7-10 of moments and errors
             mask_4r = [True, True, True, True, True, True, False, False, False, False, True, True, True, True, True, True, True, True,
                        True, True, True, True, True, True, False, False, False, False, True, True, True, True, True, True, True, True]
             np.testing.assert_equal(np.array(moments)[mask_4r], np.array(moments_4r))
